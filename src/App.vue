@@ -64,7 +64,7 @@ export default {
   data() {
     return {
       currentRound: 1,
-      totalRounds: 1,
+      totalRounds: 3,
       currentExerciseIndex: 0,
       timeLeft: 0,
       isRunning: false,
@@ -237,7 +237,7 @@ export default {
       if (this.currentExerciseIndex >= this.exercises.length) {
         this.currentRound++;
         
-        // Check if we've completed all 3 rounds
+        // Check if we've completed all the rounds
         if (this.currentRound > this.totalRounds) {
           this.completeWorkout();
           return;
