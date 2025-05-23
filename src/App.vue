@@ -4,7 +4,7 @@
     <div class="header">
       <h1>Ab Workout Timer</h1>
       <div class="round-indicator">
-        Round {{ currentRound }} / 3
+        Round {{ Math.min(currentRound, totalRounds) }} / {{ totalRounds }}
       </div>
     </div>
 
@@ -18,8 +18,20 @@
         {{ formatTime(timeLeft) }}
       </div>
       
-      <div class="progress-bar">
-        <div class="progress-fill" :style="{ width: progressPercent + '%' }"></div>
+      <div class="progress-section">
+        <div class="progress-item">
+          <div class="progress-label">Current Exercise</div>
+          <div class="progress-bar">
+            <div class="progress-fill" :style="{ width: progressPercent + '%' }"></div>
+          </div>
+        </div>
+        
+        <div class="progress-item">
+          <div class="progress-label">Overall Workout</div>
+          <div class="progress-bar overall-progress">
+            <div class="progress-fill overall-fill" :style="{ width: overallProgressPercent + '%' }"></div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -29,14 +41,9 @@
         Start Workout
       </button>
       
-      <div v-if="isRunning" class="running-controls">
-        <button @click="pauseWorkout" class="pause-btn">
-          {{ isPaused ? 'Resume' : 'Pause' }}
-        </button>
-        <button @click="resetWorkout" class="reset-btn">
-          Reset
-        </button>
-      </div>
+      <button v-if="isRunning" @click="pauseWorkout" class="pause-btn">
+        {{ isPaused ? 'Resume' : 'Pause' }}
+      </button>
       
       <button v-if="isFinished" @click="resetWorkout" class="restart-btn">
         Start Again
@@ -46,7 +53,7 @@
     <!-- Workout Complete -->
     <div v-if="isFinished" class="completion-message">
       <h2>🎉 Workout Complete! 🎉</h2>
-      <p>Great job completing all 3 rounds!</p>
+      <p>Great job completing all {{ totalRounds }} rounds!</p>
     </div>
   </div>
 </template>
@@ -57,7 +64,7 @@ export default {
   data() {
     return {
       currentRound: 1,
-      totalRounds: 3,
+      totalRounds: 1,
       currentExerciseIndex: 0,
       timeLeft: 0,
       isRunning: false,
@@ -94,6 +101,17 @@ export default {
     progressPercent() {
       if (this.currentExercise.duration === 0) return 100;
       return ((this.currentExercise.duration - this.timeLeft) / this.currentExercise.duration) * 100;
+    },
+    
+    overallProgressPercent() {
+      const totalExercises = this.exercises.length * this.totalRounds;
+      const completedExercises = (this.currentRound - 1) * this.exercises.length + this.currentExerciseIndex;
+      const currentExerciseProgress = this.currentExercise.duration > 0 
+        ? (this.currentExercise.duration - this.timeLeft) / this.currentExercise.duration 
+        : 0;
+      
+      const overallProgress = (completedExercises + currentExerciseProgress) / totalExercises * 100;
+      return Math.min(overallProgress, 100);
     }
   },
   
@@ -255,7 +273,6 @@ export default {
       this.isPaused = false;
       this.isFinished = false;
       this.currentRound = 1;
-      this.totalRounds = 3;
       this.currentExerciseIndex = 0;
       this.timeLeft = 0;
       
@@ -313,7 +330,8 @@ export default {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  max-width: 90%;
+  width: 100%;
+  max-width: 400px;
   min-height: 0; /* Prevents flex overflow */
 }
 
@@ -348,13 +366,40 @@ export default {
   100% { transform: scale(1); }
 }
 
+.progress-section {
+  width: 100%;
+  max-width: 400px;
+  margin-bottom: 20px;
+}
+
+.progress-item {
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.progress-item:last-child {
+  margin-bottom: 0;
+}
+
+.progress-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: rgba(255, 255, 255, 0.8);
+  text-align: left;
+  width: 100%;
+}
+
 .progress-bar {
   width: 100%;
   height: 8px;
   background: rgba(255,255,255,0.3);
   border-radius: 4px;
   overflow: hidden;
-  margin-bottom: 20px;
+}
+
+.overall-progress {
+  height: 6px;
 }
 
 .progress-fill {
@@ -362,6 +407,10 @@ export default {
   background: linear-gradient(90deg, #51cf66, #40c057);
   transition: width 1s linear;
   border-radius: 4px;
+}
+
+.overall-fill {
+  background: linear-gradient(90deg,rgb(255, 193, 59), #f59f00);
 }
 
 .controls {
@@ -392,36 +441,22 @@ export default {
   box-shadow: 0 6px 20px rgba(0,0,0,0.3);
 }
 
-.running-controls {
-  display: flex;
-  gap: 15px;
-  width: 100%;
-  max-width: 300px;
-  margin: 0 auto;
-}
-
-.pause-btn, .reset-btn {
-  flex: 1;
-  padding: 12px 20px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  border: none;
-  border-radius: 25px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
 .pause-btn {
   background: linear-gradient(135deg, #ffd43b, #fab005);
   color: #333;
+  border: none;
+  padding: 16px 32px;
+  font-size: 1.4rem;
+  font-weight: 600;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  transition: all 0.3s ease;
+  width: 100%;
+  max-width: 300px;
 }
 
-.reset-btn {
-  background: linear-gradient(135deg, #ff6b6b, #fa5252);
-  color: white;
-}
-
-.pause-btn:hover, .reset-btn:hover {
+.pause-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
@@ -464,6 +499,10 @@ export default {
 @media (max-width: 480px) {
   .workout-app {
     padding: 15px 15px 50px 15px; /* More bottom padding on mobile */
+  }
+  
+  .timer-container {
+    max-width: 95%;
   }
   
   .header h1 {
