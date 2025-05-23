@@ -272,20 +272,24 @@ export default {
 
 <style scoped>
 .workout-app {
-  height: 100vh;
+  min-height: 100vh;
+  min-height: 100dvh; /* Dynamic viewport height for modern browsers */
+  min-height: -webkit-fill-available; /* Safari fallback */
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
-  padding: 20px;
+  padding: 20px 20px 40px 20px; /* Extra bottom padding for iPhone */
   color: white;
   text-align: center;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-sizing: border-box;
 }
 
 .header {
   width: 100%;
   margin-bottom: 20px;
+  flex-shrink: 0;
 }
 
 .header h1 {
@@ -310,6 +314,7 @@ export default {
   justify-content: center;
   align-items: center;
   max-width: 90%;
+  min-height: 0; /* Prevents flex overflow */
 }
 
 .exercise-name {
@@ -361,7 +366,10 @@ export default {
 
 .controls {
   width: 100%;
-  margin-top: 20px;
+  margin-top: auto;
+  margin-bottom: env(safe-area-inset-bottom, 0px); /* iPhone X+ safe area */
+  padding-bottom: 20px;
+  flex-shrink: 0;
 }
 
 .start-btn, .restart-btn {
@@ -454,6 +462,10 @@ export default {
 
 /* Mobile responsive adjustments */
 @media (max-width: 480px) {
+  .workout-app {
+    padding: 15px 15px 50px 15px; /* More bottom padding on mobile */
+  }
+  
   .header h1 {
     font-size: 2rem;
   }
@@ -469,12 +481,38 @@ export default {
   .completion-message h2 {
     font-size: 1.8rem;
   }
+  
+  .controls {
+    margin-bottom: max(env(safe-area-inset-bottom, 0px), 30px);
+  }
+}
+
+/* iPhone specific adjustments */
+@media (max-width: 480px) and (-webkit-min-device-pixel-ratio: 2) {
+  .workout-app {
+    min-height: calc(100vh - 60px); /* Account for Safari UI */
+    padding-bottom: 60px;
+  }
+  
+  .controls {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 40px);
+    max-width: 300px;
+    background: rgba(0,0,0,0.1);
+    backdrop-filter: blur(10px);
+    padding: 15px;
+    border-radius: 25px;
+    margin: 0;
+  }
 }
 
 /* Landscape orientation adjustments */
 @media (orientation: landscape) and (max-height: 600px) {
   .workout-app {
-    padding: 10px;
+    padding: 10px 10px 30px 10px;
   }
   
   .header h1 {
@@ -490,6 +528,10 @@ export default {
   .exercise-name {
     font-size: 1.2rem;
     margin-bottom: 15px;
+  }
+  
+  .controls {
+    margin-top: 10px;
   }
 }
 </style> 
