@@ -1,0 +1,21 @@
+{
+  "name": "hansel-ab-workout",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "Mobile ab workout timer app with Vue.js",
+  "dependencies": {
+    "vue": "^3.3.13"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.5.2",
+    "vite": "^5.0.11"
+  }
+}
